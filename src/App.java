@@ -1,3 +1,4 @@
+import java.io.Console;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -10,8 +11,8 @@ public class App {
 
     private static List<List<Integer>> populacao = new ArrayList<List<Integer>>();
     private static int numeroAlunos;
-    private static List<Integer> manha = new ArrayList<Integer>(List.of(1, 2, 3));
-    private static List<Integer> tarde = new ArrayList<Integer>(List.of(1, 2, 3));
+    private static List<Integer> manha = new ArrayList<Integer>();
+    private static List<Integer> tarde = new ArrayList<Integer>();
     private static List<List<Integer>> duplas = new ArrayList<List<Integer>>();
     private static ArrayList<List<Integer>> preferenciaManha = new ArrayList<List<Integer>>();
     private static ArrayList<List<Integer>> preferenciaTarde = new ArrayList<List<Integer>>();
@@ -47,8 +48,6 @@ public class App {
                 preferenciaTarde.add(tempList);
             }
         }
-
-        System.out.println(tarde);
     }
 
     public static void init() {
@@ -83,7 +82,7 @@ public class App {
 
         aptidao();
         melhor = getBest();
-        System.out.println(melhor);
+        System.out.println("Melhor - " + melhor);
     }
 
     public static int getBest() {
@@ -122,7 +121,7 @@ public class App {
         preferenciaAlunoManhaCopia.remove(0);
         preferenciaAlunoTardeCopia.remove(0);        
 
-        int pontuacao = (manha.size() - preferenciaAlunoManhaCopia.indexOf(alunoTarde)) + tarde.size() - preferenciaAlunoTardeCopia.indexOf(alunoManha);        
+        int pontuacao = (manha.size() - preferenciaAlunoManhaCopia.indexOf(alunoTarde)) + (tarde.size() - preferenciaAlunoTardeCopia.indexOf(alunoManha));        
 
         return pontuacao;
     }
