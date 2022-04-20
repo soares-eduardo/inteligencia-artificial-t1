@@ -11,7 +11,7 @@ import org.w3c.dom.css.Counter;
 
 public class App {
 
-    private static List<List<Integer>> populacao = new ArrayList<List<Integer>>();
+    private static List<List<String>> populacao = new ArrayList<List<String>>();
     private static int numeroAlunos;
     private static List<Integer> manha = new ArrayList<Integer>();
     private static List<Integer> tarde = new ArrayList<Integer>();
@@ -85,7 +85,7 @@ public class App {
         }
         System.out.println(duplas);
 
-        // aptidao();
+        aptidao();
         // melhor = getBest();
         // System.out.println("Melhor - " + melhor);
     }
@@ -102,31 +102,36 @@ public class App {
     //     return melhor;
     // } 
 
-    // public static void aptidao() {
-    //     duplas.forEach(dupla -> {
-    //         dupla.add(calculaAptidao(dupla));
-    //         System.out.print("M"+ dupla.get(0));
-    //         System.out.print(",");
-    //         System.out.print("T"+ dupla.get(1));
-    //         System.out.print(" Valor:" + dupla.get(2));
-    //         System.out.println();
-    //     });
-    // }
+    public static void aptidao() {
+        duplas.forEach(dupla -> {
+            System.out.println(calculaAptidao(dupla));
+            dupla.add(Integer.toString(calculaAptidao(dupla)));
+            populacao.add(dupla);
+        });
 
-    public static int calculaAptidao(List<Integer> dupla) {
-        int alunoManha = dupla.get(0);
-        int alunoTarde = dupla.get(1);
+        System.out.println(populacao);
+    }
 
-        List<Integer> preferenciaAlunoManha = preferenciaManha.stream().filter(x -> x.get(0) == alunoManha).collect(Collectors.toList()).get(0);
-        List<Integer> preferenciaAlunoTarde = preferenciaTarde.stream().filter(x -> x.get(0) == alunoTarde).collect(Collectors.toList()).get(0);
+    public static int calculaAptidao(List<String> cromossomo) {
+        int pontuacao = 0;
+        for (int i = 0; i < cromossomo.size(); i++) {
+            int alunoManha = Integer.parseInt(cromossomo.get(i).split("-")[0]);
+            int alunoTarde = Integer.parseInt(cromossomo.get(i).split("-")[1]);
 
-        List<Integer> preferenciaAlunoManhaCopia = new ArrayList<Integer>(preferenciaAlunoManha);
-        List<Integer> preferenciaAlunoTardeCopia = new ArrayList<Integer>(preferenciaAlunoTarde);
+            List<Integer> preferenciaAlunoManha = preferenciaManha.stream().filter(x -> x.get(0) == alunoManha)
+                    .collect(Collectors.toList()).get(0);
+            List<Integer> preferenciaAlunoTarde = preferenciaTarde.stream().filter(x -> x.get(0) == alunoTarde)
+                    .collect(Collectors.toList()).get(0);
 
-        preferenciaAlunoManhaCopia.remove(0);
-        preferenciaAlunoTardeCopia.remove(0);        
+            List<Integer> preferenciaAlunoManhaCopia = new ArrayList<Integer>(preferenciaAlunoManha);
+            List<Integer> preferenciaAlunoTardeCopia = new ArrayList<Integer>(preferenciaAlunoTarde);
 
-        int pontuacao = (manha.size() - preferenciaAlunoManhaCopia.indexOf(alunoTarde)) + (tarde.size() - preferenciaAlunoTardeCopia.indexOf(alunoManha));        
+            preferenciaAlunoManhaCopia.remove(0);
+            preferenciaAlunoTardeCopia.remove(0);
+
+            pontuacao += (manha.size() - preferenciaAlunoManhaCopia.indexOf(alunoTarde))
+                    + (tarde.size() - preferenciaAlunoTardeCopia.indexOf(alunoManha));
+        }
 
         return pontuacao;
     }
