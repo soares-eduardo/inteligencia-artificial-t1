@@ -1,11 +1,13 @@
-import java.io.Console;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.stream.Collectors;
+
+import org.w3c.dom.css.Counter;
 
 public class App {
 
@@ -13,7 +15,7 @@ public class App {
     private static int numeroAlunos;
     private static List<Integer> manha = new ArrayList<Integer>();
     private static List<Integer> tarde = new ArrayList<Integer>();
-    private static List<List<Integer>> duplas = new ArrayList<List<Integer>>();
+    private static ArrayList<List<String>> duplas = new ArrayList<List<String>>();
     private static ArrayList<List<Integer>> preferenciaManha = new ArrayList<List<Integer>>();
     private static ArrayList<List<Integer>> preferenciaTarde = new ArrayList<List<Integer>>();
     public static void main(String[] args) throws Exception {
@@ -51,62 +53,65 @@ public class App {
     }
 
     public static void init() {
-        List<Integer> alunosManhaDisponiveis = manha;
-        List<Integer> alunosTardeDisponiveis = tarde;
-        int melhor = 0;
-
         Random rand = new Random();
-        while(duplas.size() < alunosManhaDisponiveis.size()) {
-            int indexManha = rand.nextInt(manha.size());
-            int indexTarde = rand.nextInt(tarde.size());
-            int alunoManha = alunosManhaDisponiveis.get(indexManha);
-            int alunoTarde = alunosTardeDisponiveis.get(indexTarde);
-            
-            if (alunoManha == 0) {
-                indexManha = rand.nextInt(manha.size());
-                alunoManha = alunosManhaDisponiveis.get(indexManha);
+        for (int i = 0; i < 10; i ++) {
+            int counter = 0;
+            List<Integer> alunosManhaDisponiveis = new ArrayList<Integer>(manha);
+            List<Integer> alunosTardeDisponiveis = new ArrayList<Integer>(tarde);
+            List<String> duplasDefinidas =  new ArrayList<String>();
+            while(counter < numeroAlunos) {
+                int indexManha = rand.nextInt(manha.size());
+                int indexTarde = rand.nextInt(tarde.size());
+                int alunoManha = alunosManhaDisponiveis.get(indexManha);
+                int alunoTarde = alunosTardeDisponiveis.get(indexTarde);
+                
+                if (alunoManha == 0) {
+                    indexManha = rand.nextInt(manha.size());
+                    alunoManha = alunosManhaDisponiveis.get(indexManha);
 
-            } else if (alunoTarde == 0) {
-                indexTarde = rand.nextInt(tarde.size());
-                alunoTarde = alunosTardeDisponiveis.get(indexTarde);
+                } else if (alunoTarde == 0) {
+                    indexTarde = rand.nextInt(tarde.size());
+                    alunoTarde = alunosTardeDisponiveis.get(indexTarde);
 
-            } else {
-                List<Integer> teste = new ArrayList<Integer>();
-                teste.add(alunoManha);
-                teste.add(alunoTarde);
-                duplas.add(teste);
-                alunosManhaDisponiveis.set(indexManha, 0);                
-                alunosTardeDisponiveis.set(indexTarde, 0);                
+                } else {
+                    String dupla = alunoManha + "-" + alunoTarde;
+                    duplasDefinidas.add(dupla);
+                    alunosManhaDisponiveis.set(indexManha, 0);                
+                    alunosTardeDisponiveis.set(indexTarde, 0);         
+                    counter++;
+                }
             }
+            duplas.add(duplasDefinidas);
         }
+        System.out.println(duplas);
 
-        aptidao();
-        melhor = getBest();
-        System.out.println("Melhor - " + melhor);
+        // aptidao();
+        // melhor = getBest();
+        // System.out.println("Melhor - " + melhor);
     }
 
-    public static int getBest() {
-        int melhor = 0;
+    // public static int getBest() {
+    //     int melhor = 0;
 
-        for (int i = 0; i < duplas.size(); i++) {
-            if (duplas.get(i).get(2) > melhor) {
-                melhor = duplas.get(i).get(2);
-            }
-        }
+    //     for (int i = 0; i < duplas.size(); i++) {
+    //         if (duplas.get(i).get(2) > melhor) {
+    //             melhor = duplas.get(i).get(2);
+    //         }
+    //     }
 
-        return melhor;
-    } 
+    //     return melhor;
+    // } 
 
-    public static void aptidao() {
-        duplas.forEach(dupla -> {
-            dupla.add(calculaAptidao(dupla));
-            System.out.print("M"+ dupla.get(0));
-            System.out.print(",");
-            System.out.print("T"+ dupla.get(1));
-            System.out.print(" Valor:" + dupla.get(2));
-            System.out.println();
-        });
-    }
+    // public static void aptidao() {
+    //     duplas.forEach(dupla -> {
+    //         dupla.add(calculaAptidao(dupla));
+    //         System.out.print("M"+ dupla.get(0));
+    //         System.out.print(",");
+    //         System.out.print("T"+ dupla.get(1));
+    //         System.out.print(" Valor:" + dupla.get(2));
+    //         System.out.println();
+    //     });
+    // }
 
     public static int calculaAptidao(List<Integer> dupla) {
         int alunoManha = dupla.get(0);
