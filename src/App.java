@@ -1,26 +1,37 @@
+import java.io.Console;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
-import org.w3c.dom.css.Counter;
-
 public class App {
 
     private static List<List<String>> populacao = new ArrayList<List<String>>();
+    private static List<List<String>> populacaoIntermediaria = new ArrayList<List<String>>();
     private static int numeroAlunos;
     private static List<Integer> manha = new ArrayList<Integer>();
     private static List<Integer> tarde = new ArrayList<Integer>();
     private static ArrayList<List<String>> duplas = new ArrayList<List<String>>();
     private static ArrayList<List<Integer>> preferenciaManha = new ArrayList<List<Integer>>();
     private static ArrayList<List<Integer>> preferenciaTarde = new ArrayList<List<Integer>>();
+
     public static void main(String[] args) throws Exception {
         lerArquivo();
         init();
+
+        for (int i = 0; i < 100; i++) {
+            aptidao();
+            List<String> melhor = getBest();
+            populacaoIntermediaria.add(melhor);
+            System.out.println("melhor:" + melhor);
+            crossover();
+    
+            populacao = populacaoIntermediaria;
+            populacaoIntermediaria = new ArrayList<List<String>>();
+        }
     }
 
     public static void lerArquivo() throws FileNotFoundException {
@@ -83,33 +94,113 @@ public class App {
             }
             duplas.add(duplasDefinidas);
         }
-        System.out.println(duplas);
-
-        aptidao();
-        // melhor = getBest();
-        // System.out.println("Melhor - " + melhor);
     }
 
-    // public static int getBest() {
-    //     int melhor = 0;
+    public static List<String> torneio () {
+        Random rand = new Random();
+        List<String> duplas1 = new ArrayList<String>();
+        List<String> duplas2;
+        duplas1 = populacao.get(rand.nextInt(populacao.size()));
+        duplas2 = populacao.get(rand.nextInt(populacao.size()));
 
-    //     for (int i = 0; i < duplas.size(); i++) {
-    //         if (duplas.get(i).get(2) > melhor) {
-    //             melhor = duplas.get(i).get(2);
-    //         }
-    //     }
+        if (Integer.parseInt(duplas1.get(duplas1.size() - 1)) >= Integer.parseInt(duplas2.get(duplas2.size() - 1))) {
+            return duplas1;
+        } else {
+            return duplas2;
+        }
+    }
 
-    //     return melhor;
-    // } 
+    public static void crossover() {
+        List<String> pai = torneio();
+        List<String> mae = torneio();
+        List<String> filhos = new ArrayList<String>();
+        int counter = 0;
+        Random rand = new Random();
+        while (filhos.size() < numeroAlunos) {
+            int randPai = rand.nextInt(numeroAlunos); 
+            int randMae = rand.nextInt(numeroAlunos);
+            if (isFilhoValido(pai.get(randPai), filhos)) {
+                filhos.add(pai.get(randPai));
+            }
+    
+            if (isFilhoValido(mae.get(randMae), filhos)) {
+                filhos.add(mae.get(randMae));
+            }
+
+            counter++;
+
+            if (counter > numeroAlunos * 4) {
+                int manhaAluno = 0;
+                int tardeAluno = 0;
+                while(filhos.size() < numeroAlunos) {
+                    List<Integer> filhosManha = new ArrayList<Integer>();
+                    List<Integer> filhosTarde = new ArrayList<Integer>();
+
+                    filhos.forEach(x -> {
+                        filhosManha.add(Integer.parseInt(x.split("-")[0]));
+                        filhosTarde.add(Integer.parseInt(x.split("-")[1]));
+                    });
+
+                    for (int aluno : manha) {
+                        if (!filhosManha.contains(aluno)) {
+                            manhaAluno = aluno;
+                        }
+                        if (!filhosTarde.contains(aluno)) {
+                            tardeAluno = aluno;
+                        }
+                    }
+
+                    String duplaAlunoNovo = manhaAluno + "-" + tardeAluno;
+                    filhos.add(duplaAlunoNovo);
+                }
+            }
+        }
+
+        if (populacaoIntermediaria.size() < numeroAlunos) {
+            populacaoIntermediaria.add(filhos);
+            crossover();
+        }
+    }
+
+    public static boolean isFilhoValido(String filho, List<String> filhos) {
+        int primeiroCounter = 0;
+        int segundoCounter = 0;
+
+        for (int i = 0; i < filhos.size(); i++) {
+            if (filhos.get(i).split("-")[0].equals(filho.split("-")[0])) {
+                primeiroCounter++;
+            }
+            if (filhos.get(i).split("-")[1].equals(filho.split("-")[1])) {
+                segundoCounter++;
+            }
+        }
+
+        if (primeiroCounter > 0 || segundoCounter > 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public static List<String> getBest() {
+        int melhor = 0;
+        List<String> melhorDupla = new ArrayList<String>();
+
+        for (int i = 0; i < duplas.size(); i++) {
+            List<String> duplaLista = duplas.get(i);
+            if (Integer.parseInt(duplaLista.get(duplaLista.size()-1)) > melhor) {
+                melhor = Integer.parseInt(duplaLista.get(duplaLista.size()-1));
+                melhorDupla = duplaLista;
+            }
+        }
+        return melhorDupla;
+    } 
 
     public static void aptidao() {
         duplas.forEach(dupla -> {
-            System.out.println(calculaAptidao(dupla));
             dupla.add(Integer.toString(calculaAptidao(dupla)));
             populacao.add(dupla);
         });
-
-        System.out.println(populacao);
     }
 
     public static int calculaAptidao(List<String> cromossomo) {
