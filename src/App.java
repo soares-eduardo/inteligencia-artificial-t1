@@ -1,4 +1,3 @@
-import java.io.Console;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -19,23 +18,76 @@ public class App {
     private static ArrayList<List<Integer>> preferenciaTarde = new ArrayList<List<Integer>>();
 
     public static void main(String[] args) throws Exception {
+        Random rand = new Random();
+
         lerArquivo();
         init();
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 400; i++) {
             aptidao();
             List<String> melhor = getBest();
             populacaoIntermediaria.add(melhor);
             System.out.println("melhor:" + melhor);
             crossover();
-    
-            populacao = populacaoIntermediaria;
+            populacaoIntermediaria.get(0).remove(populacaoIntermediaria.get(0).size() -1);
+
+            if (rand.nextInt(10) == 0) {
+                System.out.println("Mutação");
+                mutacao();
+            }
+            
+            duplas = (ArrayList<List<String>>) populacaoIntermediaria;
+
             populacaoIntermediaria = new ArrayList<List<String>>();
         }
     }
 
+    public static void mutacao() {
+        Random rand = new Random();
+        int quant = rand.nextInt(3) + 1;
+
+        for (int i = 0; i < quant; i++) {
+            int individuo = 0;
+            while(individuo == 0) {
+                individuo = rand.nextInt(numeroAlunos);
+            }
+
+            System.out.println( "individuo" + populacaoIntermediaria.get(individuo));
+
+            int posicao1 = 0;
+            int posicao2 = 0;
+            String dupla1 = ""; 
+            String dupla2 = ""; 
+
+            int alunoManhaNovo = manha.get(rand.nextInt(manha.size()));
+            int alunoTardeNovo = tarde.get(rand.nextInt(tarde.size()));
+            String alunoDuplaNovo = alunoManhaNovo + "-" + alunoTardeNovo;
+
+            for (int j = 0; j < populacaoIntermediaria.get(individuo).size(); j++) {
+                if (Integer.parseInt(populacaoIntermediaria.get(individuo).get(j).split("-")[0]) == alunoManhaNovo ) {
+                    dupla1 = populacaoIntermediaria.get(individuo).get(j);
+                    posicao1 = j;
+                }
+                if (Integer.parseInt(populacaoIntermediaria.get(individuo).get(j).split("-")[1]) == alunoTardeNovo) {
+                    dupla2 = populacaoIntermediaria.get(individuo).get(j);
+                    posicao2 = j;
+                }
+            }
+            
+            populacaoIntermediaria.get(individuo).remove(dupla1);
+            populacaoIntermediaria.get(individuo).remove(dupla2);
+
+            System.out.println("Cromossomo " + individuo + " sofreu mutação nas cargas de indice " + posicao1 + " e " + posicao2);
+
+            populacaoIntermediaria.get(individuo).add(alunoDuplaNovo);
+            populacaoIntermediaria.set(individuo, preencherFilhos(populacaoIntermediaria.get(individuo)));
+
+            System.out.println("resultado mutacao:" + populacaoIntermediaria.get(individuo));
+        }
+    }
+
     public static void lerArquivo() throws FileNotFoundException {
-        Scanner read = new Scanner(new FileReader("pares10.txt"));
+        Scanner read = new Scanner(new FileReader("pares40.txt"));
         int counter = 0;
 
         while(read.hasNextLine()) {
@@ -65,7 +117,7 @@ public class App {
 
     public static void init() {
         Random rand = new Random();
-        for (int i = 0; i < 10; i ++) {
+        for (int i = 0; i < numeroAlunos * 4; i ++) {
             int counter = 0;
             List<Integer> alunosManhaDisponiveis = new ArrayList<Integer>(manha);
             List<Integer> alunosTardeDisponiveis = new ArrayList<Integer>(tarde);
@@ -130,29 +182,7 @@ public class App {
             counter++;
 
             if (counter > numeroAlunos * 4) {
-                int manhaAluno = 0;
-                int tardeAluno = 0;
-                while(filhos.size() < numeroAlunos) {
-                    List<Integer> filhosManha = new ArrayList<Integer>();
-                    List<Integer> filhosTarde = new ArrayList<Integer>();
-
-                    filhos.forEach(x -> {
-                        filhosManha.add(Integer.parseInt(x.split("-")[0]));
-                        filhosTarde.add(Integer.parseInt(x.split("-")[1]));
-                    });
-
-                    for (int aluno : manha) {
-                        if (!filhosManha.contains(aluno)) {
-                            manhaAluno = aluno;
-                        }
-                        if (!filhosTarde.contains(aluno)) {
-                            tardeAluno = aluno;
-                        }
-                    }
-
-                    String duplaAlunoNovo = manhaAluno + "-" + tardeAluno;
-                    filhos.add(duplaAlunoNovo);
-                }
+                filhos = preencherFilhos(filhos);
             }
         }
 
@@ -160,6 +190,34 @@ public class App {
             populacaoIntermediaria.add(filhos);
             crossover();
         }
+    }
+
+    public static List<String> preencherFilhos(List<String> filhos) {
+        int manhaAluno = 0;
+        int tardeAluno = 0;
+        while (filhos.size() < numeroAlunos) {
+            List<Integer> filhosManha = new ArrayList<Integer>();
+            List<Integer> filhosTarde = new ArrayList<Integer>();
+
+            filhos.forEach(x -> {
+                filhosManha.add(Integer.parseInt(x.split("-")[0]));
+                filhosTarde.add(Integer.parseInt(x.split("-")[1]));
+            });
+
+            for (int aluno : manha) {
+                if (!filhosManha.contains(aluno)) {
+                    manhaAluno = aluno;
+                }
+                if (!filhosTarde.contains(aluno)) {
+                    tardeAluno = aluno;
+                }
+            }
+
+            String duplaAlunoNovo = manhaAluno + "-" + tardeAluno;
+            filhos.add(duplaAlunoNovo);
+        }
+
+        return filhos;
     }
 
     public static boolean isFilhoValido(String filho, List<String> filhos) {
@@ -209,6 +267,7 @@ public class App {
             int alunoManha = Integer.parseInt(cromossomo.get(i).split("-")[0]);
             int alunoTarde = Integer.parseInt(cromossomo.get(i).split("-")[1]);
 
+            
             List<Integer> preferenciaAlunoManha = preferenciaManha.stream().filter(x -> x.get(0) == alunoManha)
                     .collect(Collectors.toList()).get(0);
             List<Integer> preferenciaAlunoTarde = preferenciaTarde.stream().filter(x -> x.get(0) == alunoTarde)
