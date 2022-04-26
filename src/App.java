@@ -20,10 +20,17 @@ public class App {
     public static void main(String[] args) throws Exception {
         Random rand = new Random();
 
-        lerArquivo();
-        init();
+        Scanner readOp = new Scanner(System.in);
 
-        int geracao = 400;
+        System.out.print("Informe o número de pares de acordo com os testes fornecidos: ");
+        lerArquivo(menu(readOp.nextInt()));
+
+        System.out.print("Informe o número de gerações: ");
+        int geracao = readOp.nextInt();
+
+        //readOp.close();
+
+        init();
 
         for (int i = 0; i < geracao; i++) {
             System.out.println("\n\n##### GERAÇÃO "+i+"#####");
@@ -46,6 +53,68 @@ public class App {
             duplas = (ArrayList<List<String>>) populacaoIntermediaria;
 
             populacaoIntermediaria = new ArrayList<List<String>>();
+        }
+    }
+
+    public static String menu(int op) {
+        String arquivo;
+
+        switch (op) {
+            case 3:
+                arquivo = "pares3.txt"; 
+                break;
+            case 10:
+                arquivo = "pares10.txt";
+                break;
+            case 20:
+                arquivo = "pares20.txt";
+                break;
+            case 30:
+                arquivo = "pares30.txt";
+                break;
+            case 40:
+                arquivo = "pares40.txt";
+                break;
+            case 50:
+                arquivo = "pares50.txt";
+                break;
+            case 100:
+                arquivo = "pares100.txt";
+                break;
+            default:
+                arquivo = "pares3.txt";
+                break;
+        }
+
+        return arquivo;
+    }
+
+    public static void lerArquivo(String arquivo) throws FileNotFoundException {
+        Scanner read = new Scanner(new FileReader(arquivo));
+        int counter = 0;
+
+        while(read.hasNextLine()) {
+            if (counter == 0) {
+                numeroAlunos = Integer.parseInt(read.nextLine());
+            }
+            counter++;
+            if (counter <= numeroAlunos) {
+                List<Integer> tempList = new ArrayList<Integer>(); 
+
+                for (String s : read.nextLine().split(" ")) tempList.add(Integer.valueOf(s));
+
+                preferenciaManha.add(tempList);
+
+                manha.add(counter);
+                tarde.add(counter);
+            } else {
+                List<Integer> tempList = new ArrayList<Integer>();
+
+                for (String s : read.nextLine().split(" "))
+                    tempList.add(Integer.valueOf(s));
+
+                preferenciaTarde.add(tempList);
+            }
         }
     }
 
@@ -102,35 +171,6 @@ public class App {
             populacaoIntermediaria.set(individuo, preencherFilhos(populacaoIntermediaria.get(individuo)));
 
             System.out.println("- Resultado Mutação:" + populacaoIntermediaria.get(individuo));
-        }
-    }
-
-    public static void lerArquivo() throws FileNotFoundException {
-        Scanner read = new Scanner(new FileReader("pares3.txt"));
-        int counter = 0;
-
-        while(read.hasNextLine()) {
-            if (counter == 0) {
-                numeroAlunos = Integer.parseInt(read.nextLine());
-            }
-            counter++;
-            if (counter <= numeroAlunos) {
-                List<Integer> tempList = new ArrayList<Integer>(); 
-
-                for (String s : read.nextLine().split(" ")) tempList.add(Integer.valueOf(s));
-
-                preferenciaManha.add(tempList);
-
-                manha.add(counter);
-                tarde.add(counter);
-            } else {
-                List<Integer> tempList = new ArrayList<Integer>();
-
-                for (String s : read.nextLine().split(" "))
-                    tempList.add(Integer.valueOf(s));
-
-                preferenciaTarde.add(tempList);
-            }
         }
     }
 
