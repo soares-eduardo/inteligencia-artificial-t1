@@ -23,23 +23,42 @@ public class App {
         lerArquivo();
         init();
 
-        for (int i = 0; i < 400; i++) {
+        int geracao = 400;
+
+        for (int i = 0; i < geracao; i++) {
+            System.out.println("\n\n##### GERAÇÃO "+i+"#####");
             aptidao();
             List<String> melhor = getBest();
             populacaoIntermediaria.add(melhor);
-            System.out.println("melhor:" + melhor);
+            System.out.println("Melhor:" + melhor);
             crossover();
             populacaoIntermediaria.get(0).remove(populacaoIntermediaria.get(0).size() -1);
 
             if (rand.nextInt(10) == 0) {
-                System.out.println("Mutação");
+                System.out.println("\n##### MUTAÇÃO #####");
                 mutacao();
+            }
+
+            if (i == geracao - 1) {
+                System.out.println("\nMELHOR DUPLA FINAL: " + formatarMelhorDupla(melhor));
             }
             
             duplas = (ArrayList<List<String>>) populacaoIntermediaria;
 
             populacaoIntermediaria = new ArrayList<List<String>>();
         }
+    }
+
+    public static List<String> formatarMelhorDupla(List<String> melhorDupla) {
+        List<String> duplaFormatada = new ArrayList<>();
+
+        for (String par : melhorDupla) {
+            String manha = par.split("-")[0];
+            String tarde = par.split("-")[1];
+            duplaFormatada.add("M" + manha + "-" + "T" + tarde);
+        }
+
+        return duplaFormatada;
     }
 
     public static void mutacao() {
@@ -52,7 +71,7 @@ public class App {
                 individuo = rand.nextInt(numeroAlunos);
             }
 
-            System.out.println( "individuo" + populacaoIntermediaria.get(individuo));
+            System.out.println( "- Individuo" + populacaoIntermediaria.get(individuo));
 
             int posicao1 = 0;
             int posicao2 = 0;
@@ -77,17 +96,17 @@ public class App {
             populacaoIntermediaria.get(individuo).remove(dupla1);
             populacaoIntermediaria.get(individuo).remove(dupla2);
 
-            System.out.println("Cromossomo " + individuo + " sofreu mutação nas cargas de indice " + posicao1 + " e " + posicao2);
+            System.out.println("- Cromossomo " + individuo + " sofreu mutação nas cargas de indice " + posicao1 + " e " + posicao2);
 
             populacaoIntermediaria.get(individuo).add(alunoDuplaNovo);
             populacaoIntermediaria.set(individuo, preencherFilhos(populacaoIntermediaria.get(individuo)));
 
-            System.out.println("resultado mutacao:" + populacaoIntermediaria.get(individuo));
+            System.out.println("- Resultado Mutação:" + populacaoIntermediaria.get(individuo));
         }
     }
 
     public static void lerArquivo() throws FileNotFoundException {
-        Scanner read = new Scanner(new FileReader("pares40.txt"));
+        Scanner read = new Scanner(new FileReader("pares3.txt"));
         int counter = 0;
 
         while(read.hasNextLine()) {
@@ -146,6 +165,9 @@ public class App {
             }
             duplas.add(duplasDefinidas);
         }
+
+        System.out.println("\n\n##### POPULAÇÃO INICIAL #####");
+        System.out.println(duplas);
     }
 
     public static List<String> torneio () {
@@ -258,6 +280,7 @@ public class App {
         duplas.forEach(dupla -> {
             dupla.add(Integer.toString(calculaAptidao(dupla)));
             populacao.add(dupla);
+            System.out.println(dupla);
         });
     }
 
