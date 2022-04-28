@@ -1,5 +1,7 @@
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -18,35 +20,43 @@ public class App {
     private static ArrayList<List<Integer>> preferenciaTarde = new ArrayList<List<Integer>>();
 
     public static void main(String[] args) throws Exception {
+        FileWriter fw = new FileWriter("./log.txt");
         Random rand = new Random();
-
         Scanner readOp = new Scanner(System.in);
 
         System.out.print("Informe o número de pares de acordo com os testes fornecidos: ");
-        lerArquivo(menu(readOp.nextInt()));
+        int pares = readOp.nextInt();
+        lerArquivo(menu(pares));
+        fw.write("Numero de pares: " + pares);
 
         System.out.print("Informe o número de gerações: ");
         int geracao = readOp.nextInt();
 
         //readOp.close();
 
-        init();
+        fw.write("\nNumero de geracoes: " + geracao);
+        
+        init(fw);
 
         for (int i = 0; i < geracao; i++) {
             System.out.println("\n\n##### GERAÇÃO "+i+"#####");
-            aptidao();
+            fw.write("\n\n##### GERACAO "+i+"#####");
+            aptidao(fw);
             List<String> melhor = getBest();
             populacaoIntermediaria.add(melhor);
             System.out.println("Melhor:" + melhor);
+            fw.write("\nMelhor:" + melhor);
             crossover();
             populacaoIntermediaria.get(0).remove(populacaoIntermediaria.get(0).size() -1);
 
             if (rand.nextInt(10) == 0) {
                 System.out.println("\n##### MUTAÇÃO #####");
-                mutacao();
+                fw.write("\n\n##### MUTACAO #####");
+                mutacao(fw);
             }
 
             if (i == geracao - 1) {
+                fw.write("\n\nMELHOR DUPLA FINAL: " + formatarMelhorDupla(melhor));
                 System.out.println("\nMELHOR DUPLA FINAL: " + formatarMelhorDupla(melhor));
             }
             
@@ -54,6 +64,7 @@ public class App {
 
             populacaoIntermediaria = new ArrayList<List<String>>();
         }
+        fw.close();
     }
 
     public static String menu(int op) {
@@ -130,7 +141,7 @@ public class App {
         return duplaFormatada;
     }
 
-    public static void mutacao() {
+    public static void mutacao(FileWriter fw) throws IOException {
         Random rand = new Random();
         int quant = rand.nextInt(3) + 1;
 
@@ -140,7 +151,15 @@ public class App {
                 individuo = rand.nextInt(numeroAlunos);
             }
 
-            System.out.println( "- Individuo" + populacaoIntermediaria.get(individuo));
+
+            System.out.println("- Individuo" + populacaoIntermediaria.get(individuo));
+
+            // Escrever no log
+            var individuoIntermediaria = populacaoIntermediaria.get(individuo);
+            fw.write("\n- Individuo ");
+            for (String string : individuoIntermediaria) {
+                fw.write(string + " ");
+            }
 
             int posicao1 = 0;
             int posicao2 = 0;
@@ -167,16 +186,23 @@ public class App {
 
             System.out.println("- Cromossomo " + individuo + " sofreu mutação nas cargas de indice " + posicao1 + " e " + posicao2);
 
+            fw.write("\n- Cromossomo " + individuo + " sofreu mutacao nas cargas de indice " + posicao1 + " e "+ posicao2);
+
             populacaoIntermediaria.get(individuo).add(alunoDuplaNovo);
             populacaoIntermediaria.set(individuo, preencherFilhos(populacaoIntermediaria.get(individuo)));
 
             System.out.println("- Resultado Mutação:" + populacaoIntermediaria.get(individuo));
+            
+            fw.write("\n- Resultado Mutacao:");
+            for (String string : populacaoIntermediaria.get(individuo)) {
+                fw.write(string + " ");
+            }
         }
     }
 
-    public static void init() {
+    public static void init(FileWriter fw ) throws IOException {
         Random rand = new Random();
-        for (int i = 0; i < numeroAlunos * 4; i ++) {
+        for (int i = 0; i < numeroAlunos; i ++) {
             int counter = 0;
             List<Integer> alunosManhaDisponiveis = new ArrayList<Integer>(manha);
             List<Integer> alunosTardeDisponiveis = new ArrayList<Integer>(tarde);
@@ -206,6 +232,13 @@ public class App {
             duplas.add(duplasDefinidas);
         }
 
+        fw.write("\n\n##### POPULACAO INICIAL #####\n");
+        for (int i = 0; i < duplas.size(); i++) {
+            for (int j = 0; j < duplas.get(i).size(); j++) {
+                fw.write(duplas.get(i).get(j) + " ");
+            }
+            fw.write("\n");
+        }
         System.out.println("\n\n##### POPULAÇÃO INICIAL #####");
         System.out.println(duplas);
     }
@@ -243,7 +276,7 @@ public class App {
 
             counter++;
 
-            if (counter > numeroAlunos * 4) {
+            if (counter > numeroAlunos) {
                 filhos = preencherFilhos(filhos);
             }
         }
@@ -316,10 +349,22 @@ public class App {
         return melhorDupla;
     } 
 
-    public static void aptidao() {
+    public static void aptidao(FileWriter fw) {
         duplas.forEach(dupla -> {
             dupla.add(Integer.toString(calculaAptidao(dupla)));
             populacao.add(dupla);
+            try {
+                fw.write("\n");
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            for (String d : dupla) {
+                try {
+                    fw.write(d + " ");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
             System.out.println(dupla);
         });
     }
